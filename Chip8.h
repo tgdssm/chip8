@@ -8,28 +8,52 @@
 #ifndef CHIP8_CHIP8_H
 #define CHIP8_CHIP8_H
 
+const unsigned int VIDEO_HEIGHT = 32;
+const unsigned int VIDEO_WIDTH = 64;
+const unsigned int REGISTERS = 16;
+const unsigned int MEMORY_SIZE = 4096;
+const unsigned int STACK = 16;
+const unsigned int KEYS = 16;
+
 class Chip8 {
 public:
     Chip8();
 
-    void loadROM(const char *filename);
+    void Cycle();
 
-    uint8_t registers[16]{};
-    uint8_t memory[4096]{};
+    void LoadROM(const char *filename);
+
+    uint8_t registers[REGISTERS]{};
+    uint8_t memory[MEMORY_SIZE]{};
     uint16_t index{};
     uint16_t pc{};
-    uint16_t stack[16]{};
+    uint16_t stack[STACK]{};
     uint8_t sp{};
     uint8_t delayTimer{};
     uint8_t soundTimer{};
-    uint8_t keypad[16]{};
-    uint32_t video[64 * 32]{};
+    uint8_t keypad[KEYS]{};
+    uint32_t video[VIDEO_WIDTH * VIDEO_HEIGHT]{};
     uint16_t opcode{};
 
     std::default_random_engine randGen;
     std::uniform_int_distribution<uint8_t> randByte;
 
 private:
+    typedef void (Chip8::*Chip8Function)();
+
+    Chip8Function table[0xF + 1];
+    Chip8Function table0[0xE + 1];
+    Chip8Function table8[0xE + 1];
+    Chip8Function tableE[0xE + 1];
+    Chip8Function tableF[0x65 + 1];
+
+    void Table0();
+
+    void Table8();
+
+    void TableE();
+
+    void TableF();
 
     void OP_NULL();
 
