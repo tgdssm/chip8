@@ -1,3 +1,0 @@
-/Users/thalisson.melo/CLionProjects/chip8/cmake-build-debug/CMakeFiles/chip8.dir
-/Users/thalisson.melo/CLionProjects/chip8/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/thalisson.melo/CLionProjects/chip8/cmake-build-debug/CMakeFiles/rebuild_cache.dir
