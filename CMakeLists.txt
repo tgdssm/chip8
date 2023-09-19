@@ -17,6 +17,8 @@ link_directories(${SDL2_LIB_DIR})
 
 add_executable(chip8 main.cpp
         Chip8.cpp
-        Chip8.h)
+        Chip8.h
+        Display.cpp
+        Display.h)
 
 target_link_libraries(${PROJECT_NAME} SDL2::SDL2)

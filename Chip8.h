@@ -41,11 +41,11 @@ public:
 private:
     typedef void (Chip8::*Chip8Function)();
 
-    Chip8Function table[0xF + 1];
-    Chip8Function table0[0xE + 1];
-    Chip8Function table8[0xE + 1];
-    Chip8Function tableE[0xE + 1];
-    Chip8Function tableF[0x65 + 1];
+    Chip8Function table[0xF + 1]{};
+    Chip8Function table0[0xE + 1]{};
+    Chip8Function table8[0xE + 1]{};
+    Chip8Function tableE[0xE + 1]{};
+    Chip8Function tableF[0x65 + 1]{};
 
     void Table0();
 

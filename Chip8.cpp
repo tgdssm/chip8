@@ -4,13 +4,15 @@
 
 #include <fstream>
 #include "Chip8.h"
-#include<SDL.h>
+#include <chrono>
+#include <cstring>
+#include <random>
 
 const unsigned int FONT_SET_START_ADDRESS = 0x50;
 const unsigned int START_ADDRESS = 0x200;
 const unsigned int FONT_SET_SIZE = 80;
 
-uint8_t fontSet[FONT_SET_SIZE]{
+uint8_t fontSet[FONT_SET_SIZE] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
         0x20, 0x60, 0x20, 0x20, 0x70, // 1
         0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -31,7 +33,7 @@ uint8_t fontSet[FONT_SET_SIZE]{
 
 Chip8::Chip8() : randGen(std::chrono::system_clock::now().time_since_epoch().count()) {
     pc = START_ADDRESS;
-    for (unsigned int i = 0; i < FONT_SET_SIZE; i++) {
+    for (unsigned int i = 0; i < FONT_SET_SIZE; ++i) {
         memory[FONT_SET_START_ADDRESS + i] = fontSet[i];
     }
 
@@ -54,7 +56,7 @@ Chip8::Chip8() : randGen(std::chrono::system_clock::now().time_since_epoch().cou
     table[0xE] = &Chip8::TableE;
     table[0xF] = &Chip8::TableF;
 
-    for (size_t i = 0; i < 0xE; i++) {
+    for (size_t i = 0; i <= 0xE; i++) {
         table0[i] = &Chip8::OP_NULL;
         table8[i] = &Chip8::OP_NULL;
         tableE[i] = &Chip8::OP_NULL;
@@ -73,10 +75,10 @@ Chip8::Chip8() : randGen(std::chrono::system_clock::now().time_since_epoch().cou
     table8[0x7] = &Chip8::OP_8xy7;
     table8[0xE] = &Chip8::OP_8xyE;
 
-    table[0x1] = &Chip8::OP_ExA1;
+    tableE[0x1] = &Chip8::OP_ExA1;
     tableE[0xE] = &Chip8::OP_Ex9E;
 
-    for (size_t i = 0; i < 0x65; i++) {
+    for (size_t i = 0; i <= 0x65; i++) {
         tableF[i] = &Chip8::OP_NULL;
     }
 
@@ -96,13 +98,13 @@ void Chip8::Cycle() {
     opcode = (memory[pc] << 8u) | memory[pc + 1];
     pc += 2;
 
-    (*(this).*(table[(opcode & 0xF000u) >> 12u]))();
+    ((*this).*(table[(opcode & 0xF000u) >> 12u]))();
 
     if (delayTimer > 0) {
-        delayTimer--;
+        --delayTimer;
     }
     if (soundTimer > 0) {
-        soundTimer--;
+        --soundTimer;
     }
 }
 
@@ -115,7 +117,7 @@ void Chip8::LoadROM(const char *filename) {
         file.read(buffer, size);
         file.close();
 
-        for (long i = 0; i < size; i++) {
+        for (long i = 0; i < size; ++i) {
             memory[START_ADDRESS + i] = buffer[i];
         }
 
@@ -124,20 +126,20 @@ void Chip8::LoadROM(const char *filename) {
 }
 
 void Chip8::Table0() {
-    ((*this).*(table0[opcode & 0x00Fu]))();
+    ((*this).*(table0[opcode & 0x000Fu]))();
 }
 
 void Chip8::Table8() {
-    ((*this).*(table8[opcode & 0x00Fu]))();
+    ((*this).*(table8[opcode & 0x000Fu]))();
 }
 
 void Chip8::TableE() {
-    ((*this).*(tableE[opcode & 0x00Fu]))();
+    ((*this).*(tableE[opcode & 0x000Fu]))();
 
 }
 
 void Chip8::TableF() {
-    ((*this).*(tableF[opcode & 0x00Fu]))();
+    ((*this).*(tableF[opcode & 0x00FFu]))();
 }
 
 void Chip8::OP_NULL() {}
@@ -147,7 +149,7 @@ void Chip8::OP_00E0() {
 }
 
 void Chip8::OP_00EE() {
-    sp--;
+    --sp;
     pc = stack[sp];
 
 }
@@ -164,7 +166,7 @@ void Chip8::OP_1nnn() {
 void Chip8::OP_2nnn() {
     uint16_t address = opcode & 0x0FFFu;
     stack[sp] = pc;
-    sp++;
+    ++sp;
     pc = address;
 }
 
@@ -300,12 +302,12 @@ void Chip8::OP_9xy0() {
 }
 
 void Chip8::OP_Annn() {
-    uint16_t address = opcode & 0xFFFu;
+    uint16_t address = opcode & 0x0FFFu;
     index = address;
 }
 
 void Chip8::OP_Bnnn() {
-    uint16_t address = opcode & 0xFFFu;
+    uint16_t address = opcode & 0x0FFFu;
     pc = registers[0] + address;
 }
 
@@ -326,10 +328,10 @@ void Chip8::OP_Dxyn() {
 
     registers[0xF] = 0;
 
-    for (unsigned int row = 0; row < height; row++) {
+    for (unsigned int row = 0; row < height; ++row) {
         uint8_t spriteByte = memory[index + row];
 
-        for (unsigned int col = 0; col < 8; col++) {
+        for (unsigned int col = 0; col < 8; ++col) {
             uint8_t spritePixel = spriteByte & (0x80u >> col);
             uint32_t *screenPixel = &video[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
 
@@ -443,14 +445,14 @@ void Chip8::OP_Fx33() {
 void Chip8::OP_Fx55() {
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-    for (uint8_t i = 0; i <= Vx; i++) {
+    for (uint8_t i = 0; i <= Vx; ++i) {
         memory[index + i] = registers[i];
     }
 }
 
 void Chip8::OP_Fx65() {
-    uint8_t Vx = (opcode & 0xF00u) >> 8u;
-    for (uint8_t i = 0; i <= Vx; i++) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+    for (uint8_t i = 0; i <= Vx; ++i) {
         registers[i] = memory[index + i];
     }
 }
