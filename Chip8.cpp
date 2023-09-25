@@ -63,7 +63,7 @@ Chip8::Chip8() : randGen(std::chrono::system_clock::now().time_since_epoch().cou
     }
 
     table0[0x0] = &Chip8::OP_00E0;
-    table0[0x0] = &Chip8::OP_00EE;
+    table0[0xE] = &Chip8::OP_00EE;
 
     table8[0x0] = &Chip8::OP_8xy0;
     table8[0x1] = &Chip8::OP_8xy1;
